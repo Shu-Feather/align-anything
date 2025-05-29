@@ -2120,10 +2120,10 @@ class HOMEWORK(BaseFormatter):
 
     def format_preference_sample(self, raw_sample: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
         # Determine better and worse responses based on overall_response
-        if raw_sample['overall_response'] == 1:
+        if int(raw_sample['overall_response']) == 1:
             better_response = raw_sample['response_1']
             worse_response = raw_sample['response_2']
-        elif raw_sample['overall_response'] == 2:
+        elif int(raw_sample['overall_response']) == 2:
             better_response = raw_sample['response_2']
             worse_response = raw_sample['response_1']
         else:
