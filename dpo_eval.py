@@ -26,8 +26,10 @@ reward_model      = AutoModelForSequenceClassification.from_pretrained(reward_mo
 
 # 测试集加载 (PKU-Alignment/Align-Anything)
 ds = load_dataset("/data/align_anything_t2t", split="validation")
-num = 5
-prompts = ds["question"][:num] 
+num = 200
+# 随机索引
+random_indices = np.random.choice(len(ds), size=num, replace=False)
+prompts = [ds[int(i)]["question"] for i in random_indices]
 
 
 def generate_responses(model, tokenizer, prompts, max_new_tokens=512):
@@ -118,9 +120,9 @@ plt.figure(figsize=(10, 6))
 plt.hist(delta_scores, bins=50, color='skyblue', edgecolor='black')
 plt.axvline(delta_scores.mean(), color='red', linestyle='dashed', linewidth=2, 
             label=f'Mean Δ = {delta_scores.mean():.2f}')
-plt.xlabel("DPO 模型评分 - 基模型评分")
-plt.ylabel("Case 数量")
-plt.title("评分差分布")
+plt.xlabel("DPO Model vs. Base Model")
+plt.ylabel("# of Case")
+plt.title("Distribution")
 plt.legend()
 plt.savefig(f"{plot_dir}/delta_score_hist.png")
 plt.close()
@@ -179,14 +181,9 @@ with open(f"{plot_dir}/case_analysis.txt", "w") as f:
 # 5. 行为改变总结
 print("\n行为改变分析总结:")
 if delta_scores.mean() > 0:
-    print(f"✅ DPO微调成功 - 平均奖励提升 {delta_scores.mean():.2f} 分")
-    print(f"改进最显著的领域: 安全(+{top_improvements['delta_score'].mean():.2f}), 帮助性(+{top_improvements['delta_score'].mean():.2f})")
+    print(f"DPO微调成功 - 平均奖励提升 {delta_scores.mean():.2f} 分")
 else:
-    print(f"⚠️ DPO微调可能存在问题 - 平均奖励下降 {abs(delta_scores.mean()):.2f} 分")
-    print("可能原因分析:")
-    print("1. DPO微调不充分或过度拟合")
-    print("2. 奖励模型与人类偏好不一致")
-    print("3. 偏好数据集中存在噪声或偏差")
+    print(f"DPO微调可能存在问题 - 平均奖励下降 {abs(delta_scores.mean()):.2f} 分")
 
 # 6. 响应长度分析
 def calculate_length(text):
@@ -200,9 +197,9 @@ plt.figure(figsize=(10, 6))
 sns.scatterplot(x="length_diff", y="delta_score", data=results, hue=np.sign(results["delta_score"]))
 plt.axhline(0, color='gray', linestyle='--')
 plt.axvline(0, color='gray', linestyle='--')
-plt.xlabel("响应长度变化 (DPO - Base)")
-plt.ylabel("奖励分数变化")
-plt.title("响应长度变化与奖励分数变化的关系")
+plt.xlabel("Response Length Variation (DPO - Base)")
+plt.ylabel("Reward Variation")
+plt.title("The relation between Response Length and Reward")
 plt.savefig(f"{plot_dir}/length_vs_score.png")
 plt.close()
 
