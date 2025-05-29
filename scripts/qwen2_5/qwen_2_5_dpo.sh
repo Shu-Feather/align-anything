@@ -16,13 +16,13 @@
 # ==============================================================================
 
 
-MODEL_NAME_OR_PATH="Qwen/Qwen2.5-0.5B-Instruct" # model path
+MODEL_NAME_OR_PATH="/data/Qwen2.5-0.5B-Instruct" # model path
 
-TRAIN_DATASETS="../assets/text_to_text/preference" # dpo dataset path
-TRAIN_TEMPLATE="PKUSafeRLHF" # dataset template
+TRAIN_DATASETS="/data/align_anything_t2t" # rm dataset path
+TRAIN_TEMPLATE="HOMEWORK" # dataset template
 TRAIN_SPLIT="train" # split the dataset
 
-OUTPUT_ROOT_DIR=$OUTPUT_ROOT_DIR
+OUTPUT_ROOT_DIR="../hsy_0528_outputs_dpo"
 
 if [ -z "$OUTPUT_ROOT_DIR" ]; then
     echo "OUTPUT_ROOT_DIR is not set"
@@ -32,7 +32,7 @@ fi
 OUTPUT_DIR="${OUTPUT_ROOT_DIR}/qwen_2_5_dpo" # output dir
 
 # For wandb online logging
-export WANDB_API_KEY=""
+export WANDB_API_KEY="bcaa59392385ab52966422a94b30994485350d7a"
 
 # Source the setup script
 source ./setup.sh

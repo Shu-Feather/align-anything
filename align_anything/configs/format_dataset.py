@@ -2112,3 +2112,40 @@ class LLaVA_Pretrain(BaseFormatter):
             {'role': 'user', 'content': [{'type': 'text', 'text': prompt}]},
             {'role': 'assistant', 'content': [{'type': 'text', 'text': answer}]},
         ], {'image': image}
+
+
+@register_template('HOMEWORK')
+class HOMEWORK(BaseFormatter):
+    system_prompt: str = ''
+
+    def format_preference_sample(self, raw_sample: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+        # Determine better and worse responses based on overall_response
+        if raw_sample['overall_response'] == 1:
+            better_response = raw_sample['response_1']
+            worse_response = raw_sample['response_2']
+        elif raw_sample['overall_response'] == 2:
+            better_response = raw_sample['response_2']
+            worse_response = raw_sample['response_1']
+        else:
+            raise ValueError(f"Invalid overall_response: {raw_sample['overall_response']}")
+
+        # Map question to prompt
+        prompt = raw_sample['question']
+
+        # Construct conversation lists
+        better_conversation = [
+            {'role': 'user', 'content': prompt},
+            {'role': 'assistant', 'content': better_response},
+        ]
+        worse_conversation = [
+            {'role': 'user', 'content': prompt},
+            {'role': 'assistant', 'content': worse_response},
+        ]
+
+        # Create meta_info with required keys for align-anything
+        meta_info = {
+            'better_response': better_response,
+            'worse_response': worse_response,
+        }
+
+        return better_conversation, worse_conversation, meta_info
