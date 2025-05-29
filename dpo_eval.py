@@ -3,6 +3,7 @@ from datasets import load_dataset
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+from tqdm import tqdm 
 
 device = "npu:0"  # 或者 npu:0
 
@@ -22,11 +23,11 @@ reward_model      = AutoModelForSequenceClassification.from_pretrained(reward_mo
 
 # 测试集加载 (PKU-Alignment/Align-Anything)
 ds = load_dataset("/data/align_anything_t2t", split="validation")
-prompts = ds["question"]  # 根据实际字段名调整
+prompts = ds["question"][:2]  # 根据实际字段名调整
 
 def generate_responses(model, tokenizer, prompts, max_new_tokens=512):
     responses = []
-    for prompt in prompts:
+    for prompt in tqdm(prompts, desc="生成响应", unit="样本"):
         messages = [
             {"role": "system", "content": "You are Qwen, created by Alibaba Cloud. You are a helpful assistant."},
             {"role": "user",   "content": prompt}
@@ -44,22 +45,27 @@ def generate_responses(model, tokenizer, prompts, max_new_tokens=512):
         responses.append(resp)
     return responses
 
+print("生成基模型响应...")
 base_resps = generate_responses(base_model, base_tokenizer, prompts)
+print("\n生成DPO模型响应...")
 dpo_resps  = generate_responses(dpo_model, dpo_tokenizer, prompts)
 
 
 def score_with_reward(reward_model, reward_tokenizer, prompts, responses):
     scores = []
-    for p, r in zip(prompts, responses):
+    for p, r in tqdm(zip(prompts, responses), total=len(prompts), desc="评分响应", unit="样本"):
         text = f"[PROMPT]\n{p}\n[RESPONSE]\n{r}"
         inputs = reward_tokenizer(text, return_tensors="pt", truncation=True, max_length=1024).to(device)
         logits = reward_model(**inputs).logits
-
-        score = logits.squeeze().item()
+        
+        # 使用差值作为奖励分数：正面分数 - 负面分数
+        score = (logits[0, 1] - logits[0, 0]).item()
         scores.append(score)
     return np.array(scores)
 
+print("\n基模型响应评分中...")
 base_scores = score_with_reward(reward_model, reward_tokenizer, prompts, base_resps)
+print("\nDPO模型响应评分中...")
 dpo_scores  = score_with_reward(reward_model, reward_tokenizer, prompts, dpo_resps)
 delta_scores = dpo_scores - base_scores
 
