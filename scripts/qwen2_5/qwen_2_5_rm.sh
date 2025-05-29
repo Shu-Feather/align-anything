@@ -22,7 +22,7 @@ TRAIN_DATASETS="/data/align_anything_t2t" # rm dataset path
 TRAIN_TEMPLATE="HOMEWORK" # dataset template
 TRAIN_SPLIT="train" # split the dataset
 
-OUTPUT_ROOT_DIR="../hsy_0528_outputs"
+OUTPUT_ROOT_DIR="../hsy_0529_outputs"
 
 if [ -z "$OUTPUT_ROOT_DIR" ]; then
     echo "OUTPUT_ROOT_DIR is not set"

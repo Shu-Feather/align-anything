@@ -16,13 +16,13 @@
 # ==============================================================================
 
 
-MODEL_NAME_OR_PATH="../hsy_0528_outputs/qwen_2_5_rm/slice_end" # model path
+MODEL_NAME_OR_PATH="../hsy_0529_outputs/qwen_2_5_rm/slice_end" # model path
 
 EVAL_DATASETS="/data/align_anything_t2t" # dataset path
 EVAL_TEMPLATE="HOMEWORK" # dataset template
 EVAL_SPLIT="validation" # split the dataset, validation
 
-OUTPUT_DIR="../hsy_0528_outputs/qwen_2_5_rm/eval" # output dir
+OUTPUT_DIR="../hsy_0529_outputs/qwen_2_5_rm/eval" # output dir
 
 # For wandb online logging
 export WANDB_API_KEY="bcaa59392385ab52966422a94b30994485350d7a"
